@@ -162,6 +162,8 @@ use BigBlueButton\Util\SimpleXMLElementExtended;
  * @method $this     setAllowOverrideClientSettingsOnCreateCall(bool $allowOverrideClientSettingsOnCreateCall)
  * @method string    getClientSettingsOverride()
  * @method $this     setClientSettingsOverride(string $clientSettingsOverride)
+ * @method string    getPersistentStateUrl()
+ * @method $this     setPersistentStateUrl(string $persistentStateUrl)
  */
 class CreateMeetingParameters extends MetaParameters
 {
