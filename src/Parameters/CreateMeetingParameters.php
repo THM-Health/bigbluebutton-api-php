@@ -214,6 +214,8 @@ class CreateMeetingParameters extends MetaParameters
     protected ?bool $allowPromoteGuestToModerator = null;
     protected ?int $userCameraCap = null;
 
+    protected ?string $persistentStateUrl = null;
+
     /**
      * @var array<array{id: string, name: string|null, roster: array<mixed>}>
      */
