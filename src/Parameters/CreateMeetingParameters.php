@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Parameters;
 
+use BigBlueButton\Core\Presentation;
 use BigBlueButton\Enum\Feature;
 use BigBlueButton\Enum\GuestPolicy;
 use BigBlueButton\Enum\MeetingLayout;
@@ -351,14 +352,22 @@ class CreateMeetingParameters extends MetaParameters
         return $this;
     }
 
-    public function addPresentation(string $nameOrUrl, ?string $content = null, ?string $filename = null, ?bool $downloadable = null, ?bool $removable = null, ?bool $current = null): self
+    /**
+     * @return $this
+     */
+    public function addPresentation(string|Presentation $nameOrUrlOrPresentation, ?string $content = null, ?string $filename = null): self
     {
-        $this->presentations[$nameOrUrl] = [
+        if ($nameOrUrlOrPresentation instanceof Presentation) {
+            $this->presentations[$nameOrUrlOrPresentation->getArrayKey()] = $nameOrUrlOrPresentation;
+
+            return $this;
+        }
+
+        @trigger_error(\sprintf('Calling addPresentation without a Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
+
+        $this->presentations[$nameOrUrlOrPresentation] = [
             'filename' => $filename,
             'content' => !$content ?: base64_encode($content),
-            'downloadable' => $downloadable,
-            'removable' => $removable,
-            'current' => $current,
         ];
 
         return $this;
@@ -426,6 +435,11 @@ class CreateMeetingParameters extends MetaParameters
             $module->addAttribute('name', 'presentation');
 
             foreach ($this->presentations as $nameOrUrl => $data) {
+                if ($data instanceof Presentation) {
+                    $data->addDocumentToXML($module);
+                    continue;
+                }
+
                 $document = $module->addChild('document');
 
                 if (str_starts_with($nameOrUrl, 'http')) {

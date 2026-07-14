@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Parameters;
 
+use BigBlueButton\Core\Presentation;
+
 /**
  * @method string getMeetingID()
  * @method $this  setMeetingID(string $id)
@@ -34,14 +36,20 @@ final class InsertDocumentParameters extends MetaParameters
     {
     }
 
-    public function addPresentation(string $nameOrUrl, ?string $content = null, ?string $filename = null, ?bool $downloadable = null, ?bool $removable = null, ?bool $current = null): self
+    public function addPresentation(string|Presentation $urlOrPresentation, ?string $filename = null, ?bool $downloadable = null, ?bool $removable = null): self
     {
-        $this->presentations[$nameOrUrl] = [
+        if ($urlOrPresentation instanceof Presentation) {
+            $this->presentations[$urlOrPresentation->getArrayKey()] = $urlOrPresentation;
+
+            return $this;
+        }
+
+        @trigger_error(\sprintf('Calling addPresentation without a Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
+
+        $this->presentations[$urlOrPresentation] = [
             'filename' => $filename,
-            'content' => !$content ?: base64_encode($content),
             'downloadable' => $downloadable,
             'removable' => $removable,
-            'current' => $current,
         ];
 
         return $this;
@@ -63,31 +71,22 @@ final class InsertDocumentParameters extends MetaParameters
             $module = $xml->addChild('module');
             $module->addAttribute('name', 'presentation');
 
-            foreach ($this->presentations as $nameOrUrl => $data) {
-                $document = $module->addChild('document');
-
-                if (str_starts_with($nameOrUrl, 'http')) {
-                    $document->addAttribute('url', $nameOrUrl);
-                } else {
-                    $document->addAttribute('name', $nameOrUrl);
-                    /* @phpstan-ignore-next-line */
-                    $document[0] = $data['content'];
+            foreach ($this->presentations as $url => $content) {
+                if ($content instanceof Presentation) {
+                    $content->addDocumentToXML($module);
+                    continue;
                 }
 
-                if (isset($data['filename'])) {
-                    $document->addAttribute('filename', $data['filename']);
+                $presentation = $module->addChild('document');
+                $presentation->addAttribute('url', $url);
+                $presentation->addAttribute('filename', $content['filename']);
+
+                if (\is_bool($content['downloadable'])) {
+                    $presentation->addAttribute('downloadable', $content['downloadable'] ? 'true' : 'false');
                 }
 
-                if (\is_bool($data['downloadable'])) {
-                    $document->addAttribute('downloadable', $data['downloadable'] ? 'true' : 'false');
-                }
-
-                if (\is_bool($data['removable'])) {
-                    $document->addAttribute('removable', $data['removable'] ? 'true' : 'false');
-                }
-
-                if (\is_bool($data['current'])) {
-                    $document->addAttribute('current', $data['current'] ? 'true' : 'false');
+                if (\is_bool($content['removable'])) {
+                    $presentation->addAttribute('removable', $content['removable'] ? 'true' : 'false');
                 }
             }
             $result = $xml->asXML();
