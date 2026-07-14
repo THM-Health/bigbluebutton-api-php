@@ -60,6 +60,8 @@ final class InsertDocumentParameters extends MetaParameters
             $presentation->setRemovable($removable);
         }
 
+        $this->presentations[$presentation->getArrayKey()] = $presentation;
+
         return $this;
     }
 
