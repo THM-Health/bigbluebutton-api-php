@@ -22,18 +22,20 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Core;
 
+use BigBlueButton\Util\SimpleXMLElementExtended;
+
 class UrlPresentation extends Presentation
 {
     public function __construct(private readonly string $url)
     {
     }
 
-    public function getArrayKey()
+    public function getArrayKey(): string
     {
         return $this->url;
     }
 
-    public function addDocumentToXML(\SimpleXMLElement $module): ?\SimpleXMLElement
+    public function addDocumentToXML(SimpleXMLElementExtended $module): ?SimpleXMLElementExtended
     {
         $document = parent::addDocumentToXML($module);
         $document->addAttribute('url', $this->url);

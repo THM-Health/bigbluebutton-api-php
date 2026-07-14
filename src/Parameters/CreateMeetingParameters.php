@@ -22,7 +22,9 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Parameters;
 
+use BigBlueButton\Core\InlinePresentation;
 use BigBlueButton\Core\Presentation;
+use BigBlueButton\Core\UrlPresentation;
 use BigBlueButton\Enum\Feature;
 use BigBlueButton\Enum\GuestPolicy;
 use BigBlueButton\Enum\MeetingLayout;
@@ -248,6 +250,7 @@ class CreateMeetingParameters extends MetaParameters
     protected ?bool $allowOverrideClientSettingsOnCreateCall = null;
     protected ?string $clientSettingsOverride = null;
 
+    /** @var array<string,Presentation> */
     private array $presentations = [];
 
     public function __construct(protected string $meetingID, protected string $name)
@@ -360,12 +363,20 @@ class CreateMeetingParameters extends MetaParameters
             return $this;
         }
 
-        @trigger_error(\sprintf('Calling addPresentation without a Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
+        @trigger_error(\sprintf('Calling addPresentation in "%s" without a Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
 
-        $this->presentations[$nameOrUrlOrPresentation] = [
-            'filename' => $filename,
-            'content' => !$content ?: base64_encode($content),
-        ];
+        if ($content) {
+            $presentation = new InlinePresentation($content, $nameOrUrlOrPresentation);
+            $this->presentations[$presentation->getArrayKey()] = $presentation;
+        } else {
+            $presentation = new UrlPresentation($nameOrUrlOrPresentation);
+
+            if ($filename != null) {
+                $presentation->setFilename($filename);
+            }
+
+            $this->presentations[$presentation->getArrayKey()] = $presentation;
+        }
 
         return $this;
     }
@@ -390,7 +401,7 @@ class CreateMeetingParameters extends MetaParameters
         return $this;
     }
 
-    /** @return array<string,string> */
+    /** @return array<string,Presentation> */
     public function getPresentations(): array
     {
         return $this->presentations;
@@ -431,36 +442,9 @@ class CreateMeetingParameters extends MetaParameters
             $module = $xml->addChild('module');
             $module->addAttribute('name', 'presentation');
 
-            foreach ($this->presentations as $nameOrUrl => $data) {
+            foreach ($this->presentations as $data) {
                 if ($data instanceof Presentation) {
                     $data->addDocumentToXML($module);
-                    continue;
-                }
-
-                $document = $module->addChild('document');
-
-                if (str_starts_with($nameOrUrl, 'http')) {
-                    $document->addAttribute('url', $nameOrUrl);
-                } else {
-                    $document->addAttribute('name', $nameOrUrl);
-                    /* @phpstan-ignore-next-line */
-                    $document[0] = $data['content'];
-                }
-
-                if (isset($data['filename'])) {
-                    $document->addAttribute('filename', $data['filename']);
-                }
-
-                if (\is_bool($data['downloadable'])) {
-                    $document->addAttribute('downloadable', $data['downloadable'] ? 'true' : 'false');
-                }
-
-                if (\is_bool($data['removable'])) {
-                    $document->addAttribute('removable', $data['removable'] ? 'true' : 'false');
-                }
-
-                if (\is_bool($data['current'])) {
-                    $document->addAttribute('current', $data['current'] ? 'true' : 'false');
                 }
             }
         }

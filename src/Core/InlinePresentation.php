@@ -22,6 +22,8 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Core;
 
+use BigBlueButton\Util\SimpleXMLElementExtended;
+
 class InlinePresentation extends Presentation
 {
     public function __construct(private readonly string $content, string $filename)
@@ -29,15 +31,16 @@ class InlinePresentation extends Presentation
         $this->filename = $filename;
     }
 
-    public function getArrayKey()
+    public function getArrayKey(): string
     {
         return $this->filename;
     }
 
-    public function addDocumentToXML(\SimpleXMLElement $module): ?\SimpleXMLElement
+    public function addDocumentToXML(SimpleXMLElementExtended $module): ?SimpleXMLElementExtended
     {
         $document = parent::addDocumentToXML($module);
 
+        /* @phpstan-ignore-next-line */
         $document[0] = base64_encode($this->content);
 
         if (isset($this->filename)) {

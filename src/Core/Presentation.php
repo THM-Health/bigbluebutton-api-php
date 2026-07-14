@@ -22,6 +22,8 @@ declare(strict_types=1);
 
 namespace BigBlueButton\Core;
 
+use BigBlueButton\Util\SimpleXMLElementExtended;
+
 abstract class Presentation
 {
     protected ?string $filename = null;
@@ -32,7 +34,7 @@ abstract class Presentation
 
     protected ?bool $removable = null;
 
-    public function addDocumentToXML(\SimpleXMLElement $module): ?\SimpleXMLElement
+    public function addDocumentToXML(SimpleXMLElementExtended $module): ?SimpleXMLElementExtended
     {
         $document = $module->addChild('document');
 
@@ -50,6 +52,8 @@ abstract class Presentation
 
         return $document;
     }
+
+    abstract public function getArrayKey(): string;
 
     public function getFilename(): ?string
     {
