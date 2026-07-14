@@ -351,13 +351,14 @@ class CreateMeetingParameters extends MetaParameters
         return $this;
     }
 
-    public function addPresentation(string $nameOrUrl, ?string $content = null, ?string $filename = null, ?bool $downloadable = null, ?bool $removable = null): self
+    public function addPresentation(string $nameOrUrl, ?string $content = null, ?string $filename = null, ?bool $downloadable = null, ?bool $removable = null, ?bool $current = null): self
     {
         $this->presentations[$nameOrUrl] = [
             'filename' => $filename,
             'content' => !$content ?: base64_encode($content),
             'downloadable' => $downloadable,
             'removable' => $removable,
+            'current' => $current,
         ];
 
         return $this;
@@ -445,6 +446,10 @@ class CreateMeetingParameters extends MetaParameters
 
                 if (\is_bool($data['removable'])) {
                     $document->addAttribute('removable', $data['removable'] ? 'true' : 'false');
+                }
+
+                if (\is_bool($data['current'])) {
+                    $document->addAttribute('current', $data['current'] ? 'true' : 'false');
                 }
             }
         }
