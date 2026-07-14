@@ -363,7 +363,7 @@ class CreateMeetingParameters extends MetaParameters
             return $this;
         }
 
-        @trigger_error(\sprintf('Calling addPresentation in "%s" without a Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
+        @trigger_error(\sprintf('Calling addPresentation in "%s" with any parameters other than a single Presentation object is deprecated and will throw an exception in 7.0.', self::class), \E_USER_DEPRECATED);
 
         if ($content) {
             $presentation = new InlinePresentation($content, $nameOrUrlOrPresentation);
