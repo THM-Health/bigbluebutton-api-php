@@ -163,7 +163,7 @@ use BigBlueButton\Util\SimpleXMLElementExtended;
  * @method string    getClientSettingsOverride()
  * @method $this     setClientSettingsOverride(string $clientSettingsOverride)
  * @method string    getClientSettingsOverrideJsonUrl()
- * @method $this     setClientSettingsOverrideJsonUr(string $clientSettingsOverrideJsonUrl)
+ * @method $this     setClientSettingsOverrideJsonUrl(string $clientSettingsOverrideJsonUrl)
  * @method bool|null isMultiUserWhiteboardEnabled()
  * @method $this     setMultiUserWhiteboardEnabled(bool $multiUserWhiteboardEnabled)
  * @method string    getSharedNotesEditor()
