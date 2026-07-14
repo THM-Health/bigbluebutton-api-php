@@ -248,9 +248,6 @@ class CreateMeetingParameters extends MetaParameters
     protected ?bool $allowOverrideClientSettingsOnCreateCall = null;
     protected ?string $clientSettingsOverride = null;
 
-    /**
-     * @var array<string,array<string, string|bool|null>>
-     */
     private array $presentations = [];
 
     public function __construct(protected string $meetingID, protected string $name)
